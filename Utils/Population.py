@@ -34,33 +34,3 @@ def Results(_pop:list, _matches: int):
                 for result in results for r in result]
     return [item for item in generate(_pop, _matches) if item[0] != item[1]]
 
-# Simulates the population of players, takes snapshots regularly.
-def Itterate(_N: int, _matches: int, _snapshot:int = 1000):
-    pass
-
-
-#---------------------------------------------------------------
-
-
-
-
-
-
-# def GetIndex(_n: float, _l: int) -> int:
-#     return int(_n * _l)
-
-# # Generate the result of ~N matches
-# # each result is the tuple (a: index, b; index, a_win?: bool)
-# # the outcome of a match is random yet weighted by the expected probability of the braddly terry model
-# # ~N matches due to filtering matches between a player with himself
-# def Results(_pop:list, _matches: int):
-#     def generate(_pop: list, _matches: int)->list:
-#         length = len(_pop)
-#         results = RNG.random(size=(_matches, length, 3))
-#         return [[GetIndex(r[0], length), GetIndex(r[1], length),
-#                  bool(r[2] < EloProb(_pop[GetIndex(r[0], length)], _pop[GetIndex(r[1], length)], True))]
-#                 for result in results for r in result]
-#     return [item for item in generate(_pop, _matches) if item[0] != item[1]]
-
-# # Simulates the population of players, takes snapshots regularly.
-# def Itterate(_N: int, _matches: int, _snapshot:int = 1000):

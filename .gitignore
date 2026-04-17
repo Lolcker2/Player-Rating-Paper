@@ -1,7 +1,9 @@
 # All snapshots
 Snapshot*
 *log*
+*pycache*
 
 # Cache
 Cache/
 Snapshots/
+*/__pycache__/

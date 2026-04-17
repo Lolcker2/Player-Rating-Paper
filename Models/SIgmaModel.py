@@ -1,15 +1,6 @@
 from math import sqrt, exp, log as ln
 from scipy.stats import norm
-
-class Player:
-    def __init__(self, _rating: float, _hidden: float, _s: float, _mu:float = 0.0):
-        self.rating = _rating
-        self.hidden = _hidden
-        self.mu = ln(_rating) if _mu == 0.0 else _mu
-        self.sigma = _s
-
-    def __repr__(self):
-        return f"${int(self.rating)} %{self.sigma} ({self.sigma/self.mu})% H{self.hidden}H$"
+from Utils.Player import Player
 
 def DeltaRating(_a: Player, _b: Player, _u:bool, _prob=0.0) -> float:
     return KAPPA * (int(_u) - EloProb(_a, _b)) if _prob == 0 else KAPPA * (int(_u) - _prob)
