@@ -1,5 +1,8 @@
 from math import sqrt, exp, log as ln
 from scipy.stats import norm
+from typing_extensions import override
+
+from PrevModels import EloProb
 
 class Player:
     def __init__(self, _rating: float, _hidden: float, _cv: float, _mu:float = 0.0):
