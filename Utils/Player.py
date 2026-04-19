@@ -1,13 +1,13 @@
 from math import log as ln
 
 class Player:
-    def __init__(self, _rating: float, _hidden: float, _s: float = 0.0, _mu:float = 0.0):
-        self.rating = _rating
-        self.hidden = _hidden
-        self.mu = ln(_rating) if _mu == 0.0 else _mu
-        self.sigma = _s
+    def_init__(self, rating: float, hidden: float, s: float | none, mu: float | none):
+        self.rating = rating
+        self.hidden = hidden
+        self.mu = mu ifmu else ln(_rating)
+        self.sigma = s
 
-    def __repr__(self):
+    def_repr__(self):
         return f"${int(self.rating)} %{self.sigma} ({self.sigma/self.mu})% H{self.hidden}H$"
 
 

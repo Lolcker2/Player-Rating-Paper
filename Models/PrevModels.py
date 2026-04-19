@@ -1,37 +1,37 @@
-from math import exp, log as ln
+from math import exp, norm, log as ln
 from Utils.Constants import KAPPA, SCALAR
 from Utils.Player import Player
 
 
-def Damp(_num: float, _u: int):
-    def sgn(_x):
-        return 2*_x - 1
-    return _u - sgn(_u) * (32/3) * pow(_num, 3) + sgn(_u) * 16 * pow(_num, 2) - sgn(_u) * (19/3) * _num
+def Damp(num: float, utility: int):
+    def sgn(x):
+        return 2*x - 1
+    return utility - sgn(utility) * (32/3) * pow(num, 3) + sgn(utility) * 16 * pow(num, 2) - sgn(utility) * (19/3) * num
 
 # our probability formula
-def EstProb(_a: Player, _b: Player, _sigma: bool)->float:
-    if _sigma:
-        return norm.cdf((_a.mu - _b.mu) / sqrt(_a.sigma ** 2 + _b.sigma ** 2))
-    return norm.cdf((_a.mu - _b.mu) / sqrt((_a.cv*_a.mu) ** 2 + (_b.cv*_b.mu) ** 2))
+def EstProb(player_a: Player, player_b: Player, is_sigma: bool)->float:
+    if is_sigma:
+        return norm.cdf((player_a.mu - player_b.mu) / sqrt(player_a.sigma ** 2 + player_b.sigma ** 2))
+    return norm.cdf((player_a.mu - player_b.mu) / sqrt((player_a.cv*player_a.mu) ** 2 + (player_b.cv*player_b.mu) ** 2))
 
-def DeltaRating(_a: Player, _b: Player, _u:bool, _prob=0.0) -> float:
-    return KAPPA * (int(_u) - EloProb(_a, _b)) if _prob == 0 else KAPPA * (int(_u) - _prob)
+def DeltaRating(player_a: Player, player_b: Player, utility:bool, probability=0.0) -> float:
+    return KAPPA * (int(utility) - EloProb(player_a, player_b)) if probability == 0 else KAPPA * (int(utility) - probability)
 
-def Update(_a: Player, _b: Player, _u: bool):
-    prob = EloProb(_a, _b)
-    delta = DeltaRating(_a, _b, _u, prob)
-    return Player(_a.rating + delta, _a.hidden), Player(_b.rating - delta, _b.hidden)
+def Update(player_a: Player, player_b: Player, utility: bool):
+    prob = EloProb(player_a, player_b)
+    delta = DeltaRating(player_a, player_b, utility, prob)
+    return Player(player_a.rating + delta, player_a.hidden), Player(player_b.rating - delta, player_b.hidden)
 
-def GetStr(_num: float)->float:
-    return exp(_num / SCALAR)
+def GetStr(num: float)->float:
+    return exp(num / SCALAR)
 
-def EloProb(_a: Player, _b: Player, _hidden:bool=False)->float:
-    num = round(1 / (1 + exp((_b.hidden - _a.hidden) / SCALAR)), 2) if _hidden else (
-        round(1 / (1 + exp((_b.rating - _a.rating) / SCALAR)), 2))
+def EloProb(player_a: Player, player_b: Player, is_hidden:bool=False)->float:
+    num = round(1 / (1 + exp((player_b.hidden - player_a.hidden) / SCALAR)), 2) if is_hidden else (
+        round(1 / (1 + exp((player_b.rating - player_a.rating) / SCALAR)), 2))
     return num
 
-def BTMProb(_a: Player, _b: Player, _hidden:bool=False)->float:
-    a = GetStr(_a.hidden) if _hidden else GetStr(_a.rating)
-    b = GetStr(_b.hidden) if _hidden else GetStr(_b.rating)
+def BTMProb(player_a: Player, player_b: Player, is_hidden:bool=False)->float:
+    a = GetStr(player_a.hidden) if is_hidden else GetStr(player_a.rating)
+    b = GetStr(player_b.hidden) if is_hidden else GetStr(player_b.rating)
     num = round(a/(a + b), 2)
     return num

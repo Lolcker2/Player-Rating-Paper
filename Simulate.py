@@ -6,7 +6,7 @@ print(data)
 
 ResultWeights = {"1-0": 1, "½-½": 0, "0-1": -1}
 
-def reOrient(_match: list, _name: str):
+def reOrient(match: list, name: str):
     if _match[1][0] == _name:
         return [_match[1], _match[0], -1 * _match[2]]
     return  _match
