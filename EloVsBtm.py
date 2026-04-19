@@ -1,6 +1,5 @@
 from math import exp, log as ln
 from numpy.random import default_rng
-from Models.PrevModels import *
 from Utils.Constants import *
 from Utils.Population import *
 from Utils.Player import Player
@@ -9,7 +8,7 @@ from Utils.Player import Player
 # Simulates the population of players, takes snapshots regularly.
 def Itterate(_N: int, _matches: int, _snapshot:int = 1000):
     population = Populate(_N)
-    results = Results(population, _matches)
+    results = Results(population, _matches, True)
     for i in range(len(results)):
         result = results[i]
 
