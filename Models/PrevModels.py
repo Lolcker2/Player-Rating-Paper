@@ -1,4 +1,5 @@
-from math import exp, norm, log as ln
+from math import exp, log as ln
+from scipy.stats import norm
 from Utils.Constants import KAPPA, SCALAR
 from Utils.Player import Player
 

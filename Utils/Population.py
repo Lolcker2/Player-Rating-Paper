@@ -2,18 +2,18 @@ from Utils.Constants import KAPPA, GAMMA, ETA, START_RATING, RNG, START_CV, STAR
 from math import log as ln
 from Models.PrevModels import BTMProb, EloProb
 from Utils.Player import Player
-from enum import enum
+from enum import IntEnum 
 
-class PlayerInitMode(enum):
+class PlayerInitMode(IntEnum):
     NONE = 0
     SIGMA = 1
     CV = 2
 
-def NewPlayer(_rating: float, hidden: float=0.0, sigma_cv: float | none, is_cv: bool = False) -> Player:
+def NewPlayer(rating: float, hidden: float=0.0, sigma_cv: float | none, is_cv: bool = False) -> Player:
     if sigma_cv:
-        mu = ln(_rating)
-        return is_cv and Player(_rating, hidden, sigma_cv*mu, mu) or Player(_rating, hidden, sigma_cv, mu) 
-    return Player(_rating, hidden)
+        mu = ln(rating)
+        return  Player(rating, hidden, sigma_cv*mu, mu) if is_cv else Player(rating, hidden, sigma_cv, mu) 
+    return Player(rating, hidden)
 
 
 # Create a list of N players, with constant starting data and random "hidden" strength between 1200 and 1500
@@ -39,14 +39,14 @@ def GetIndex(n: float, l: int) -> int:
 def Results(population:list, matches: int, BTM: bool=False):
     def generateBTM(population: list, matches: int)->list:
         length = len(population)
-        results = RNG.random(size=(_matches, length, 3))
+        results = RNG.random(size=(matches, length, 3))
         return [[GetIndex(r[0], length), GetIndex(r[1], length),
                  bool(r[2] < BTMProb(population[GetIndex(r[0], length)], pop[GetIndex(r[1], length)], True))]
                 for result in results for r in result]
 
     def generateELO(population: list, matches: int)->list:
         length = len(population)
-        results = RNG.random(size=(_matches, length, 3))
+        results = RNG.random(size=(matches, length, 3))
         return [[GetIndex(r[0], length), GetIndex(r[1], length),
                     bool(r[2] < EloProb(population[GetIndex(r[0], length)], pop[GetIndex(r[1], length)], True))]
                 for result in results for r in result]
