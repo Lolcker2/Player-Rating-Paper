@@ -10,7 +10,7 @@ def NewSigma(sigma: float, utility: int, probability: float) -> float:
 
 # updating player's delta and sigmas based on their match result
 def Update(player_a: Player, player_b: Player, utility: bool):
-    probability= EstProb(player_a, player_b, True)
+    probability= EstProb(player_a, player_b, PlayerInitMode.SIGMA)
     delta = DeltaRating(player_a, player_b, utility, probability)
     sigmas = [NewSigma(player_a.sigma, utility, probability), NewSigma(player_b.sigma, not utility, 1 - probability)]
     return (Player(player_a.rating + delta, player_a.hidden, sigmas[0]),

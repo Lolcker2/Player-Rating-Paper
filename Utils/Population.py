@@ -1,18 +1,13 @@
 from Utils.Constants import KAPPA, GAMMA, ETA, START_RATING, RNG, START_CV, START_SIGMA
 from math import log as ln
 from Models.PrevModels import BTMProb, EloProb
-from Utils.Player import Player
-from enum import IntEnum 
+from Utils.Player import Player, PlayerInitMode
 
-class PlayerInitMode(IntEnum):
-    NONE = 0
-    SIGMA = 1
-    CV = 2
 
-def NewPlayer(rating: float, hidden: float=0.0, sigma_cv: float | none, is_cv: bool = False) -> Player:
+def NewPlayer(rating: float, hidden: float=0.0, sigma_cv: float | none, init_mode: PlayerInitMode = PlayerInitMode.NONE) -> Player:
     if sigma_cv:
         mu = ln(rating)
-        return  Player(rating, hidden, sigma_cv*mu, mu) if is_cv else Player(rating, hidden, sigma_cv, mu) 
+        return  Player(rating, hidden, sigma_cv*mu, mu) if init_mode == PlayerInitMode.CV else Player(rating, hidden, sigma_cv, mu) 
     return Player(rating, hidden)
 
 

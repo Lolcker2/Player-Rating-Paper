@@ -1,7 +1,7 @@
 from math import exp, log as ln
 from scipy.stats import norm
 from Utils.Constants import KAPPA, SCALAR
-from Utils.Player import Player
+from Utils.Player import Player, PlayerInitMode
 
 
 def Damp(num: float, utility: int):
@@ -10,8 +10,8 @@ def Damp(num: float, utility: int):
     return utility - sgn(utility) * (32/3) * pow(num, 3) + sgn(utility) * 16 * pow(num, 2) - sgn(utility) * (19/3) * num
 
 # our probability formula
-def EstProb(player_a: Player, player_b: Player, is_sigma: bool)->float:
-    if is_sigma:
+def EstProb(player_a: Player, player_b: Player, init_mode: PlayerInitMode = PlayerInitMode.NONE)->float:
+    if init_mode == PlayerInitMode.SIGMA:
         return norm.cdf((player_a.mu - player_b.mu) / sqrt(player_a.sigma ** 2 + player_b.sigma ** 2))
     return norm.cdf((player_a.mu - player_b.mu) / sqrt((player_a.cv*player_a.mu) ** 2 + (player_b.cv*player_b.mu) ** 2))
 
