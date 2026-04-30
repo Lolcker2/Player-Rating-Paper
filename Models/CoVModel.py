@@ -2,6 +2,7 @@ from math import sqrt, exp, log as ln
 from scipy.stats import norm
 from Models.PrevModels import EloProb, EstProb, DeltaRating, Damp, GetStr
 from Utils.Player import Player, PlayerInitMode
+from Utils.Constants import ETA, GAMMA
 
 
 
@@ -13,7 +14,7 @@ def NewCv(_cv: float, _mu: float, utility: int, probability: float) -> float:
 def Update(player_a: Player, player_b: Player, utility: bool):
     prob = EstProb(player_a, player_b, PlayerInitMode.CV)
     delta = DeltaRating(player_a, player_b, utility, prob)
-    cvs = [NewCv(player_a.cv, player_a.mu, utility, prob), NewCv(player_b.cv, player_b.mu, not utility, 1 - prob)]
+    cvs = [NewCv(player_a.std_cv, player_a.mu, utility, prob), NewCv(player_b.std_cv, player_b.mu, not utility, 1 - prob)]
     return (Player(player_a.rating + delta, player_a.hidden, cvs[0]),
             Player(player_b.rating - delta, player_b.hidden, cvs[1]))
 

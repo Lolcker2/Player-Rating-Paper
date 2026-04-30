@@ -1,7 +1,8 @@
 from math import sqrt, exp, log as ln
 from scipy.stats import norm
-from Utils.Player import Player
+from Utils.Player import Player, PlayerInitMode
 from Models.PrevModels import EloProb, EstProb, DeltaRating, Damp, GetStr
+from Utils.Constants import ETA, GAMMA
 
 
 # calculate the new sigma based on the third formula
@@ -12,7 +13,7 @@ def NewSigma(sigma: float, utility: int, probability: float) -> float:
 def Update(player_a: Player, player_b: Player, utility: bool):
     probability= EstProb(player_a, player_b, PlayerInitMode.SIGMA)
     delta = DeltaRating(player_a, player_b, utility, probability)
-    sigmas = [NewSigma(player_a.sigma, utility, probability), NewSigma(player_b.sigma, not utility, 1 - probability)]
+    sigmas = [NewSigma(player_a.std_cv, utility, probability), NewSigma(player_b.std_cv, not utility, 1 - probability)]
     return (Player(player_a.rating + delta, player_a.hidden, sigmas[0]),
             Player(player_b.rating - delta, player_b.hidden, sigmas[1]))
 

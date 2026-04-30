@@ -1,4 +1,4 @@
-from math import exp, log as ln
+from math import sqrt, exp, log as ln
 from scipy.stats import norm
 from Utils.Constants import KAPPA, SCALAR
 from Utils.Player import Player, PlayerInitMode
@@ -12,8 +12,8 @@ def Damp(num: float, utility: int):
 # our probability formula
 def EstProb(player_a: Player, player_b: Player, init_mode: PlayerInitMode = PlayerInitMode.NONE)->float:
     if init_mode == PlayerInitMode.SIGMA:
-        return norm.cdf((player_a.mu - player_b.mu) / sqrt(player_a.sigma ** 2 + player_b.sigma ** 2))
-    return norm.cdf((player_a.mu - player_b.mu) / sqrt((player_a.cv*player_a.mu) ** 2 + (player_b.cv*player_b.mu) ** 2))
+        return norm.cdf((player_a.mu - player_b.mu) / sqrt(player_a.std_cv ** 2 + player_b.std_cv ** 2))
+    return norm.cdf((player_a.mu - player_b.mu) / sqrt((player_a.std_cv*player_a.mu) ** 2 + (player_b.std_cv*player_b.mu) ** 2))
 
 def DeltaRating(player_a: Player, player_b: Player, utility:bool, probability=0.0) -> float:
     return KAPPA * (int(utility) - EloProb(player_a, player_b)) if probability == 0 else KAPPA * (int(utility) - probability)

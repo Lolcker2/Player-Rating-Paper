@@ -4,23 +4,23 @@ from Models.PrevModels import BTMProb, EloProb
 from Utils.Player import Player, PlayerInitMode
 
 
-def NewPlayer(rating: float, hidden: float=0.0, sigma_cv: float | none, init_mode: PlayerInitMode = PlayerInitMode.NONE) -> Player:
+def NewPlayer(rating: float, hidden: float=0.0, sigma_cv: float = None, init_mode: PlayerInitMode = PlayerInitMode.NONE) -> Player:
     if sigma_cv:
         mu = ln(rating)
-        return  Player(rating, hidden, sigma_cv*mu, mu) if init_mode == PlayerInitMode.CV else Player(rating, hidden, sigma_cv, mu) 
+        return  Player(rating, hidden, sigma_cv, mu) if init_mode == PlayerInitMode.CV else Player(rating, hidden, sigma_cv, mu) 
     return Player(rating, hidden)
 
 
 # Create a list of N players, with constant starting data and random "hidden" strength between 1200 and 1500
 # 0 elo-btm, 1 sigma, 2 cv
 def Populate(_N: int, init_mode: PlayerInitMode = PlayerInitMode.NONE)->list:
-    match SCV:
+    match init_mode:
         case PlayerInitMode.NONE:
-            return [NewPlayer(START_RATING, int(1300 + 200*RNG.random())) for  in range(_N)]
+            return [NewPlayer(START_RATING, int(1300 + 200*RNG.random())) for _ in range(_N)]
         case PlayerInitMode.SIGMA:
-            return [NewPlayer(START_RATING, int(1300 + 400*RNG.random()), START_SIGMA) for  in range(_N)]
+            return [NewPlayer(START_RATING, int(1300 + 400*RNG.random()), START_SIGMA, PlayerInitMode.SIGMA) for _ in range(_N)]
         case PlayerInitMode.CV:
-            return [NewPlayer(START_RATING, int(1300 + 400*RNG.random()), START_CV) for  in range(_N)]
+            return [NewPlayer(START_RATING, int(1300 + 400*RNG.random()), START_CV, PlayerInitMode.CV) for _ in range(_N)]
     
 
 
@@ -36,14 +36,14 @@ def Results(population:list, matches: int, BTM: bool=False):
         length = len(population)
         results = RNG.random(size=(matches, length, 3))
         return [[GetIndex(r[0], length), GetIndex(r[1], length),
-                 bool(r[2] < BTMProb(population[GetIndex(r[0], length)], pop[GetIndex(r[1], length)], True))]
+                 bool(r[2] < BTMProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], True))]
                 for result in results for r in result]
 
     def generateELO(population: list, matches: int)->list:
         length = len(population)
         results = RNG.random(size=(matches, length, 3))
         return [[GetIndex(r[0], length), GetIndex(r[1], length),
-                    bool(r[2] < EloProb(population[GetIndex(r[0], length)], pop[GetIndex(r[1], length)], True))]
+                    bool(r[2] < EloProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], True))]
                 for result in results for r in result]
     if BTM:
         return [item for item in generateBTM(population, matches) if item[0] != item[1]]

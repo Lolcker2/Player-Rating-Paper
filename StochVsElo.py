@@ -4,26 +4,9 @@ from numpy.random import default_rng
 from Utils.Player import Player
 from Utils.Constants import *
 from Utils.Population import *
-from Models.PrevModels import DeltaRating, Damp
-
-# calculate the new sigma based on the third formula
-def NewSigma(sigma: float, utility: int, probability: float) -> float:
-    if snapshot_num == 9:
-        print(f"{Damp(abs(utility - probability), utility)} | {abs(utility - probability)} | {sigma}")
-    return sigma+ (ETA * Damp(abs(utility - probability), utility) - GAMMA * sigma)
-
-# updating player's delta and sigmas based on their match result
-def Update(player_a: Player, player_b: Player, utility: bool):
-    prob = EstProb(player_a, player_b)
-    delta = DeltaRating(player_a, player_b, utility, prob)
-    sigmas = [NewSigma(player_a.sigma, utility, prob), NewSigma(player_b.sigma, not utility, 1 - prob)]
-    # print(sigmas)
-    return (Player(player_a.rating + delta, player_a.hidden, sigmas[0]),
-            Player(player_b.rating - delta, player_b.hidden, sigmas[1]))
-
-# our probability formula
-def EstProb(player_a: Player, player_b: Player)->float:
-    return norm.cdf((player_a.mu - player_b.mu) / sqrt(player_a.sigma ** 2 + player_b.sigma ** 2))
+from Models.PrevModels import DeltaRating, Damp, EstProb
+import Models.CoVModel as cov
+import Models.SigmaModel as smodel
 
 
 
@@ -34,14 +17,14 @@ def Iterate(_N: int, matches: int, snapshot:int = 1000):
     for i in range(len(results)):
         result = results[i]
 
-        population[result[0]], population[result[1]] = Update(population[result[0]], population[result[1]], result[2])
+        population[result[0]], population[result[1]] = smodel.Update(population[result[0]], population[result[1]], result[2])
 
         if i % snapshot == 0:
             global snapshot_num
             snapshot_num += 1
 
             print('\n')
-            snap_list = [f"{player.sigma}, {player.sigma / player.mu}" for player in sorted(population, key=lambda x: x.sigma / x.mu)]
+            snap_list = [f"{player.std_cv}, {player.std_cv / player.mu}" for player in sorted(population, key=lambda x: x.std_cv / x.mu)]
             with open(f"Snapshot@{i/snapshot}", "w") as f:
                 f.write('\n'.join(snap_list))
 
