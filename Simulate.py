@@ -1,5 +1,8 @@
 import Models.CoVModel as cov
 import Models.SigmaModel as smodel
+from Models.PrevModels import EstProb, EloProb
+from Utils.Player import Player, PlayerInitMode
+
 
 filename = 'Magnus Carlsen-100_matches'
 data = open(r'Cache/'+filename+'.txt', "r").read().split('\n')
@@ -24,10 +27,15 @@ def getMatch(_data: list, _index: int, _match: list = False)->list:
 
 
 def predictiveTest(data):
+    players = [Player(1, 1), Player(1, 1)]
+    
+    sigma_cv = 0.1
     for match in data:
         result = reOrient(getMatch([], 0, match), "Magnus Carlsen")
-        print(result)
-
+        [players[i].rePurpose(result[i][1], 1, sigma_cv) for i in range(len(players))]
+        elo = EloProb(*players)
+        stoch = EstProb(*players, PlayerInitMode.CV)
+        print(stoch)
 
 predictiveTest(data)
 

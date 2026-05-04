@@ -1,6 +1,6 @@
 from numpy.random import default_rng
 
-KAPPA = 1
+KAPPA = 10
 ETA = 1
 SCALAR = 40
 START_RATING = 1300

@@ -27,9 +27,9 @@ def GetStr(num: float)->float:
     return exp(num / SCALAR)
 
 def EloProb(player_a: Player, player_b: Player, is_hidden:bool=False)->float:
-    num = round(1 / (1 + exp((player_b.hidden - player_a.hidden) / SCALAR)), 2) if is_hidden else (
-        round(1 / (1 + exp((player_b.rating - player_a.rating) / SCALAR)), 2))
-    return num
+    if is_hidden:
+        return round(1 / (1 + exp((player_b.TrueERating(True) - player_a.TrueERating(True)) / SCALAR)), 2)
+    return round(1 / (1 + exp((player_b.TrueERating() - player_a.TrueERating()) / SCALAR)), 2)
 
 def BTMProb(player_a: Player, player_b: Player, is_hidden:bool=False)->float:
     a = GetStr(player_a.hidden) if is_hidden else GetStr(player_a.rating)
