@@ -1,15 +1,13 @@
-# xpath =
-# url =
-# .replace(' ', '%20')
 import math
-
 import requests
 from bs4 import BeautifulSoup
 from lxml import etree as tree
 
 USER_AGENT_HEADER = {'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
-def getMatch(root, index)-> list:
+
+def getMatch(root: tree._Element, index: int)-> list:
+    # link = root[index].xpath(".//a[1]")[0]get("href")
     _p1 = root[index].xpath(".//a[1]/div[1]")[0]
     _p2 = root[index].xpath(".//a[1]/div[2]")[0]
     _r = root[index].xpath(".//td[2]/a")[0]
@@ -34,7 +32,7 @@ def cacheMatches(name: str, num: int):
         aggregate += "\n"
     aggregate += "\n".join(f"{item[0]} VS {item[1]} | {item[2]}" for item in getPage(name, pages)[0:25 if num%25==0 else num%25])
 
-    open(rf"Cache\{name}-{num}_matches.txt", "w", encoding='UTF-8').write(aggregate)
+    # open(rf"Cache\{name}-{num}_matches.txt", "w", encoding='UTF-8').write(aggregate)
 
 if __name__ == '__main__':
     cacheMatches("Magnus Carlsen", 100)
