@@ -9,6 +9,31 @@ import Models.CoVModel as cov
 import Models.SigmaModel as smodel
 
 
+# Results comes from utils.population and compares elo and btm
+# change the method below to elo vs stoch
+# also y uses hidden??
+
+# Generate the result of ~N matches
+# each result is the tuple (a: index, b; index, a_win?: bool)
+# the outcome of a match is random yet weighted by the expected probability of the braddly terry model
+# ~N matches due to filtering matches between a player with himself
+def Results(population:list, matches: int, ELO: bool=False):
+    def generateSTOCH(population: list, matches: int)->list:
+        length = len(population)
+        results = RNG.random(size=(matches, length, 3))
+        return [[GetIndex(r[0], length), GetIndex(r[1], length),
+                 bool(r[2] < EstProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], PlayerInitMode.CV))]
+                for result in results for r in result]
+
+    def generateELO(population: list, matches: int)->list:
+        length = len(population)
+        results = RNG.random(size=(matches, length, 3))
+        return [[GetIndex(r[0], length), GetIndex(r[1], length),                                                # ?
+                    bool(r[2] < EloProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], True))]
+                for result in results for r in result]
+    if ELO:
+        return [item for item in generateELO(population, matches) if item[0] != item[1]]
+    return [item for item in generateSTOCH(population, matches) if item[0] != item[1]]
 
 # Simulates the population of players, takes snapshots regularly.
 def Iterate(_N: int, matches: int, snapshot:int = 1000):

@@ -76,16 +76,6 @@ divide into 2 parts:
 todo: find where i use the model and outsource it to a standalone file
 note look at Model and Model2 see if there's anything useful.
 
-loop -> getMatch
--> reOrient -> feed model
-
-
-
-
-
-
-
-
 Magnus Carlsen, 3338 VS Alireza Firouzja, 3287 | ½-½
 Magnus Carlsen, 3328 VS Alireza Firouzja, 3297 | ½-½
 Magnus Carlsen, 3334 VS Alireza Firouzja, 3291 | ½-½
@@ -98,4 +88,10 @@ Magnus Carlsen, 3206 VS Alireza Firouzja, 3303 | ½-½
 
 
 
+to do
+utils.populate use seed instead of random
+implement elo with approximate elos in stoch vs elo utils.populate
+"close matchmaking" vs "naive matchmaking"
+
+cherry picked matches?
 """

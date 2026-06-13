@@ -27,6 +27,7 @@ def Populate(_N: int, init_mode: PlayerInitMode = PlayerInitMode.NONE)->list:
 def GetIndex(n: float, l: int) -> int:
     return int(n * l)
 
+# also y uses hidden??
 # Generate the result of ~N matches
 # each result is the tuple (a: index, b; index, a_win?: bool)
 # the outcome of a match is random yet weighted by the expected probability of the braddly terry model
@@ -35,16 +36,18 @@ def Results(population:list, matches: int, BTM: bool=False):
     def generateBTM(population: list, matches: int)->list:
         length = len(population)
         results = RNG.random(size=(matches, length, 3))
-        return [[GetIndex(r[0], length), GetIndex(r[1], length),
+        return [[GetIndex(r[0], length), GetIndex(r[1], length),                                                # ?
                  bool(r[2] < BTMProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], True))]
                 for result in results for r in result]
 
     def generateELO(population: list, matches: int)->list:
         length = len(population)
         results = RNG.random(size=(matches, length, 3))
-        return [[GetIndex(r[0], length), GetIndex(r[1], length),
+        return [[GetIndex(r[0], length), GetIndex(r[1], length),                                                # ?
                     bool(r[2] < EloProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], True))]
                 for result in results for r in result]
     if BTM:
         return [item for item in generateBTM(population, matches) if item[0] != item[1]]
     return [item for item in generateELO(population, matches) if item[0] != item[1]]
+
+
