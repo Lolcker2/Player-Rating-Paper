@@ -30,18 +30,21 @@ def getMatch(_data: list, _index: int, _match: list = False)->list:
 
 
 # build hetroskedastic version with tailing cv between opponents?
+
+# defines an epoch, simulates and evolves one player's rating
 def historicalConvergence(data):
     # filtering all draws
     data = [reOrient(getMatch([], 0, match), "Magnus Carlsen") for match in data] # reOrienting all matches
     data = [match for match in data if float.is_integer(float(match[2]))] # filtering out draws
 
-    sigma_cv = 0.06
+    sigma_cv = 0.06 # ----
     epoch = data[1]
-    print(f"epoch {epoch}")
+    
+    # fetching players form the epoch
     testedPlayer = Player(epoch[0][1], 1, sigma_cv)
     secondPlayer = Player(epoch[1][1], 1, sigma_cv)
 
-    # lagged by one meaning starts at the second and ends 1 after the last
+    # lagged by one, meaning starts at the second and ends 1 loop after the last
     for i in range(len(data) - 2, -2, -1):
         result = data[i]
         
@@ -54,9 +57,11 @@ def historicalConvergence(data):
 
 # done
 # build hetroskedastic version with tailing cv between opponents?
+
+# Tests how accurate the elo and the stochastic formulas are at predicting the result of a match 
 def predictiveTest(data):
     players = [Player(1, 1), Player(1, 1)]
-    sigma_cv = 0.06
+    sigma_cv = 0.06 # ----
 
     for match in data:
         result = reOrient(getMatch([], 0, match), "Magnus Carlsen")
@@ -68,30 +73,13 @@ def predictiveTest(data):
 historicalConvergence(data)
 
 """
-divide into 2 parts:
-    predictive elo vs stoch on historical data
-    convergance - epoch + evolution
+    Magnus Carlsen, 3338 VS Alireza Firouzja, 3287 | ½-½
+    Magnus Carlsen, 3328 VS Alireza Firouzja, 3297 | ½-½
+    Magnus Carlsen, 3334 VS Alireza Firouzja, 3291 | ½-½
+    Magnus Carlsen, 3206 VS Alireza Firouzja, 3303 | ½-½
 
-
-todo: find where i use the model and outsource it to a standalone file
-note look at Model and Model2 see if there's anything useful.
-
-Magnus Carlsen, 3338 VS Alireza Firouzja, 3287 | ½-½
-Magnus Carlsen, 3328 VS Alireza Firouzja, 3297 | ½-½
-Magnus Carlsen, 3334 VS Alireza Firouzja, 3291 | ½-½
-Magnus Carlsen, 3206 VS Alireza Firouzja, 3303 | ½-½
-
-3338 3287 |+10 -10
-3328 3297 |-6 +6
-3334 3291 |+128 -12
-3206 3303 |
-
-
-
-to do
-utils.populate use seed instead of random
-implement elo with approximate elos in stoch vs elo utils.populate
-"close matchmaking" vs "naive matchmaking"
-
-cherry picked matches?
+    3338 3287 |+10 -10
+    3328 3297 |-6 +6
+    3334 3291 |+128 -12
+    3206 3303 |
 """

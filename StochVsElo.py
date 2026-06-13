@@ -9,59 +9,96 @@ import Models.CoVModel as cov
 import Models.SigmaModel as smodel
 
 
-# Results comes from utils.population and compares elo and btm
-# change the method below to elo vs stoch
-# also y uses hidden??
-
-# Generate the result of ~N matches
-# each result is the tuple (a: index, b; index, a_win?: bool)
-# the outcome of a match is random yet weighted by the expected probability of the braddly terry model
-# ~N matches due to filtering matches between a player with himself
-def Results(population:list, matches: int, ELO: bool=False):
-    def generateSTOCH(population: list, matches: int)->list:
-        length = len(population)
-        results = RNG.random(size=(matches, length, 3))
-        return [[GetIndex(r[0], length), GetIndex(r[1], length),
-                 bool(r[2] < EstProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], PlayerInitMode.CV))]
-                for result in results for r in result]
-
-    def generateELO(population: list, matches: int)->list:
-        length = len(population)
-        results = RNG.random(size=(matches, length, 3))
-        return [[GetIndex(r[0], length), GetIndex(r[1], length),                                                # ?
-                    bool(r[2] < EloProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], True))]
-                for result in results for r in result]
-    if ELO:
-        return [item for item in generateELO(population, matches) if item[0] != item[1]]
-    return [item for item in generateSTOCH(population, matches) if item[0] != item[1]]
-
 # Simulates the population of players, takes snapshots regularly.
-def Iterate(_N: int, matches: int, snapshot:int = 1000):
+def NaiveMatchmaking(_N: int, matches: int, snapshot:int = 1000):
     population = Populate(_N, PlayerInitMode.SIGMA)
     results = Results(population, matches)
-    for i in range(len(results)):
-        result = results[i]
+    saveSnapshots(parseResults(population, results, snapshot, PlayerInitMode.SIGMA))
 
-        population[result[0]], population[result[1]] = smodel.Update(population[result[0]], population[result[1]], result[2])
 
-        if i % snapshot == 0:
-            global snapshot_num
-            snapshot_num += 1
-
-            print('\n')
-            snap_list = [f"{player.std_cv}, {player.std_cv / player.mu}" for player in sorted(population, key=lambda x: x.std_cv / x.mu)]
-            with open(f"Snapshot@{i/snapshot}", "w") as f:
-                f.write('\n'.join(snap_list))
-
-            print(f"--- Snapshot @ {i} ---")
-
+    # final rating snapshot
     finalsnapshot = ""
     for player in sorted(population, key=lambda obj: obj.hidden):
         finalsnapshot += f"{player.hidden},{int(player.rating)}\n"
     with open("log", "w") as f:
         f.write(finalsnapshot)
 
+# Simulates the population of players all divided into brackets, takes snapshots regularly.
+def BracketMatchmaking(_N: int, matches: int, bracketSize: int, snapshot:int = 1000):
+    population = sorted(Populate(_N, PlayerInitMode.SIGMA), key=lambda obj: obj.hidden)
+    finalPopulation = [] # an aggragate of all brackets
+
+    # dividing the populations to brackets
+    for i in range(0, _N, bracketSize):
+        bracket = population[i: i + bracketSize]
+        results = Results(bracket, matches)
+        saveSnapshots(parseResults(bracket, results, snapshot, PlayerInitMode.SIGMA), suffix=f"[{(i+bracketSize) // bracketSize}]")
+        finalPopulation.extend(bracket) # add bracket to the aggragate
+
+    # final rating snapshot
+    finalsnapshot = ""
+    for player in sorted(finalPopulation, key=lambda obj: obj.hidden):
+        finalsnapshot += f"{player.hidden},{int(player.rating)}\n"
+    with open("log", "w") as f:
+        f.write(finalsnapshot)
+
+# add a snapshot style macro
+
+# Loops though all results updating the population accordingly
+# returns a list of snapshots
+def parseResults(population: list, results: list, snapshot:int = 1000, model:PlayerInitMode = PlayerInitMode.SIGMA) -> list:
+    snapshot_num = 0
+    snapshot_list = []
+
+    for i in range(len(results)):
+        result = results[i]
+
+        if model == PlayerInitMode.SIGMA: # using std
+            population[result[0]], population[result[1]] = smodel.Update(population[result[0]], population[result[1]], result[2])
+        else: # using cv
+            population[result[0]], population[result[1]] = cov.Update(population[result[0]], population[result[1]], result[2])
+        
+        # snapshot handling
+        if i % snapshot == 0:
+            snapshot_num += 1
+            snapshot_list.append([f"{player.std_cv}, {player.std_cv / player.mu}" for player in sorted(population, key=lambda x: x.std_cv / x.mu)])
+    
+    # last snapshot
+    snapshot_list.append([f"{player.std_cv}, {player.std_cv / player.mu}" for player in sorted(population, key=lambda x: x.std_cv / x.mu)])
+    return snapshot_list
+
+# save all snapshots to local files
+def saveSnapshots(snap_list: list, suffix:str=""):
+    for i in range(len(snap_list)):
+        with open(f"Snapshots/Snapshot@{i+1}{suffix}", "w") as f:
+            f.write('\n'.join(snap_list[i]))
+
+
 
 if __name__ == '__main__':
-    snapshot_num = 0
-    Iterate(10, 10, snapshot=10)
+    # snapshot_num = 0
+    # NaiveMatchmaking(10, 10, snapshot=10)
+    BracketMatchmaking(10, 10, 5, snapshot=10)
+
+
+"""
+write a macro for styling / deciding what goes into the snapshots
+
+    def macro_print(func):
+        def wrapper(*args, **kwargs):
+            # Executes your function
+            result = func(*args, **kwargs)
+            # Accesses the variable from the function's local scope
+            print(f"Variable 'num' is: {result}")
+            return result
+        return wrapper
+
+    @macro_print
+    def get_num():
+        num = 100
+        return num
+
+    get_num()
+
+
+"""
