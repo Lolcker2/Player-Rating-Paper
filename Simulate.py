@@ -4,10 +4,6 @@ from Models.PrevModels import EstProb, EloProb
 from Utils.Player import Player, PlayerInitMode
 
 
-filename = 'Magnus Carlsen-100_matches'
-data = open(r'Cache/'+filename+'.txt', "r").read().split('\n')
-# print(data)
-
 ResultWeights = {"1-0": 1, "0-1": 0, "½-½": 0.5, "Â½-Â½": 0.5}
 
 # float format
@@ -26,7 +22,6 @@ def getMatch(_data: list, _index: int, _match: list = False)->list:
     p2[0] = p2[0].lstrip()
     return [p1, p2, ResultWeights[result.strip()]]
 
-#print(getMatch(data, 0))
 
 
 # build hetroskedastic version with tailing cv between opponents?
@@ -37,6 +32,7 @@ def historicalConvergence(data):
     data = [reOrient(getMatch([], 0, match), "Magnus Carlsen") for match in data] # reOrienting all matches
     data = [match for match in data if float.is_integer(float(match[2]))] # filtering out draws
 
+    aggragate = ""   # aggragate of the results
     sigma_cv = 0.06 # ----
     epoch = data[1]
     
@@ -52,25 +48,40 @@ def historicalConvergence(data):
         testedPlayer, junk = cov.Update(testedPlayer, secondPlayer, bool(result[2]))
         testedPlayer.std_cv = sigma_cv # assuming homoskedacity
 
-        print(f"E[{ff(testedPlayer.rating)}] vs A({result[0][1]})")
+        aggragate += f"E[{ff(testedPlayer.rating)}] vs A({result[0][1]})\n"
         secondPlayer.rePurpose(result[1][1], 1, sigma_cv)
+    
+    with open(f"Snapshots/HistoricalCon", "w") as f:
+        f.write(aggragate)
 
 # done
 # build hetroskedastic version with tailing cv between opponents?
 
 # Tests how accurate the elo and the stochastic formulas are at predicting the result of a match 
 def predictiveTest(data):
+    data = [reOrient(getMatch([], 0, match), "Magnus Carlsen") for match in data] # reOrienting all matches
+    data = [match for match in data if float.is_integer(float(match[2]))] # filtering out draws
+
     players = [Player(1, 1), Player(1, 1)]
     sigma_cv = 0.06 # ----
+    aggragate = "" # aggragate of the results
 
     for match in data:
-        result = reOrient(getMatch([], 0, match), "Magnus Carlsen")
-        [players[i].rePurpose(result[i][1], 1, sigma_cv) for i in range(len(players))]
+        [players[i].rePurpose(match[i][1], 1, sigma_cv) for i in range(len(players))]
         elo = EloProb(*players)
         stoch = EstProb(*players, PlayerInitMode.CV)
-        print(f"E({elo}) vs S({(ff(stoch))}): ~{result[2]}~")
+        aggragate += f"E({elo}) vs S({(ff(stoch))}): ~{match[2]}~\n"
+    
+    with open(f"Snapshots/PredictiveTest", "w") as f:
+        f.write(aggragate)
 
-historicalConvergence(data)
+if __name__ == '__main__':
+    filename = 'Magnus Carlsen-100_matches'
+    data = open(r'Cache/' + filename + '.txt', "r").read().split('\n')
+    print(data)
+
+    #historicalConvergence(data)
+    predictiveTest(data)
 
 """
     Magnus Carlsen, 3338 VS Alireza Firouzja, 3287 | ½-½
