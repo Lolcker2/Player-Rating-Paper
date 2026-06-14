@@ -1,6 +1,6 @@
 import Models.CoVModel as cov
 import Models.SigmaModel as smodel
-from Models.PrevModels import EstProb, EloProb
+from Models.PrevModels import EstProb, EloProb, Update as EloUpdate
 from Utils.Player import Player, PlayerInitMode
 
 
@@ -27,7 +27,7 @@ def getMatch(_data: list, _index: int, _match: list = False)->list:
 # build hetroskedastic version with tailing cv between opponents?
 
 # defines an epoch, simulates and evolves one player's rating
-def historicalConvergence(data):
+def historicalConvergence(data, ELO:bool=False):
     # filtering all draws
     data = [reOrient(getMatch([], 0, match), "Magnus Carlsen") for match in data] # reOrienting all matches
     data = [match for match in data if float.is_integer(float(match[2]))] # filtering out draws
@@ -45,13 +45,16 @@ def historicalConvergence(data):
         result = data[i]
         
         # updating and repurposing players
-        testedPlayer, junk = cov.Update(testedPlayer, secondPlayer, bool(result[2]))
-        testedPlayer.std_cv = sigma_cv # assuming homoskedacity
+        if ELO:
+            testedPlayer, junk = EloUpdate(testedPlayer, secondPlayer, bool(result[2]))
+        else:
+            testedPlayer, junk = cov.Update(testedPlayer, secondPlayer, bool(result[2]))
+            testedPlayer.std_cv = sigma_cv # assuming homoskedacity
 
         aggragate += f"E[{ff(testedPlayer.rating)}] vs A({result[0][1]})\n"
         secondPlayer.rePurpose(result[1][1], 1, sigma_cv)
     
-    with open(f"Snapshots/HistoricalCon", "w") as f:
+    with open(f"Snapshots/HistoricalCon{' [Elo]' if ELO else ''}", "w") as f:
         f.write(aggragate)
 
 # done
@@ -80,8 +83,7 @@ if __name__ == '__main__':
     data = open(r'Cache/' + filename + '.txt', "r").read().split('\n')
     print(data)
 
-    #historicalConvergence(data)
-    predictiveTest(data)
+    historicalConvergence(data, True)
 
 """
     Magnus Carlsen, 3338 VS Alireza Firouzja, 3287 | ½-½
