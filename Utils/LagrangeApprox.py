@@ -1,7 +1,7 @@
 from numpy.polynomial.polynomial import  *
 
 
-def basisPolynomial(_nodes: list, _pivot: int) -> Polynomial:
+def basisPolynomial(_nodes: list[float], _pivot: int) -> Polynomial:
     product = Polynomial([1])
     for i in range(len(_nodes)):
         if i == _pivot:
@@ -10,7 +10,7 @@ def basisPolynomial(_nodes: list, _pivot: int) -> Polynomial:
         product *= basisFactor / basisFactor(_nodes[_pivot])
     return product
 
-def lagrangeInterpolation(_Xnodes: list, _Ynodes: list):
+def lagrangeInterpolation(_Xnodes: list[float], _Ynodes: list[float[]]):
     summation = Polynomial([0])
     for k in range(len(_Xnodes)):
         summation += _Ynodes[k] * basisPolynomial(_Xnodes, k)

@@ -13,7 +13,7 @@ def NewPlayer(rating: float, hidden: float=0.0, sigma_cv: float = None, init_mod
 
 # Create a list of N players, with constant starting data and random "hidden" strength between 1200 and 1500
 # 0 elo-btm, 1 sigma, 2 cv
-def Populate(_N: int, init_mode: PlayerInitMode = PlayerInitMode.NONE)->list:
+def Populate(_N: int, init_mode: PlayerInitMode = PlayerInitMode.NONE)->list[Player]:
     match init_mode:
         case PlayerInitMode.NONE:
             return [NewPlayer(START_RATING, int(1300 + 200*RNG.random())) for _ in range(_N)]
@@ -31,15 +31,15 @@ def GetIndex(n: float, l: int) -> int:
 # each result is the tuple (a: index, b; index, a_win?: bool)
 # the outcome of a match is random yet weighted by the expected probability of the braddly terry model
 # ~N matches due to filtering matches between a player with himself
-def Results(population:list, matches: int, BTM: bool=False):
-    def generateBTM(population: list, matches: int)->list:
+def Results(population:list[Player], matches: int, BTM: bool=False):
+    def generateBTM(population: list[Player], matches: int)->list[list]:
         length = len(population)
         results = RNG.random(size=(matches, length, 3))
         return [[GetIndex(r[0], length), GetIndex(r[1], length),
                     bool(r[2] < BTMProb(population[GetIndex(r[0], length)], population[GetIndex(r[1], length)], True))]
                 for result in results for r in result]
 
-    def generateELO(population: list, matches: int)->list:
+    def generateELO(population: list[Player], matches: int)->list[list]:
         length = len(population)
         results = RNG.random(size=(matches, length, 3))
         return [[GetIndex(r[0], length), GetIndex(r[1], length),

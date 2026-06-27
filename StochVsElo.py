@@ -46,7 +46,7 @@ def BracketMatchmaking(_N: int, matches: int, bracketSize: int, snapshot:int = 1
 
 # Loops though all results updating the population accordingly
 # returns a list of snapshots
-def parseResults(population: list, results: list, snapshot:int = 1000, model:PlayerInitMode = PlayerInitMode.SIGMA) -> list:
+def parseResults(population: list, results: list, snapshot:int = 1000, model:PlayerInitMode = PlayerInitMode.SIGMA) -> list[str]:
     snapshot_num = 0
     snapshot_list = []
 
@@ -68,7 +68,7 @@ def parseResults(population: list, results: list, snapshot:int = 1000, model:Pla
     return snapshot_list
 
 # save all snapshots to local files
-def saveSnapshots(snap_list: list, suffix:str=""):
+def saveSnapshots(snap_list: list[str], suffix:str=""):
     for i in range(len(snap_list)):
         with open(f"Snapshots/Snapshot@{i+1}{suffix}", "w") as f:
             f.write('\n'.join(snap_list[i]))

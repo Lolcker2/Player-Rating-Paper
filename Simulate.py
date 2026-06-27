@@ -10,7 +10,8 @@ ResultWeights = {"1-0": 1, "0-1": 0, "½-½": 0.5, "Â½-Â½": 0.5}
 def ff(f):
     return f"{f:.2f}"
 
-def reOrient(_match: list, _name: str):
+# not needed
+def reOrient(_match: list[str], _name: str):
     if _match[1][0] == _name:
         return [_match[1], _match[0], -1 * _match[2] + 1] 
     return  _match
@@ -61,7 +62,7 @@ def historicalConvergence(data, ELO:bool=False):
 # build hetroskedastic version with tailing cv between opponents?
 
 # Tests how accurate the elo and the stochastic formulas are at predicting the result of a match 
-def predictiveTest(data):
+def predictiveTest(data: list):
     data = [reOrient(getMatch([], 0, match), "Magnus Carlsen") for match in data] # reOrienting all matches
     data = [match for match in data if float.is_integer(float(match[2]))] # filtering out draws
 

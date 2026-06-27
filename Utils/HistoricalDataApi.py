@@ -1,79 +1,51 @@
 import requests
 
-BASE_URL = "https://api.chess.com"
-USER_AGENT_HEADER = {"User-Agent": "personal-cache-tool/1.0 contact@example.com"}
+USER_AGENT_HEADER = {"User-Agent": "personal-cache-tool/1.0"}
+RESULT_DICT = {"win": 1, "agreed": 0.5, "repetition": 0.5, "stalemate": 0.5, "insufficient": 0.5, "50move": 0.5, "timevsinsufficient": 0.5, "draws": 0.5}
 
+# get all achives
+def getArchives(name: str) -> list[str]:
+    url = f"https://api.chess.com/pub/player/{name}/games/archives"
+    return requests.get(url, headers=USER_AGENT_HEADER).json().get("archives", [])
 
-def get_archives(username: str) -> list[str]:
-    """Return list of monthly archive URLs for a player, oldest first."""
-    url = f"{BASE_URL}/pub/player/{username}/games/archives"
-    response = requests.get(url, headers=USER_AGENT_HEADER)
-    response.raise_for_status()
-    return response.json().get("archives", [])
+# get all games from a given archive
+def gamesFromArchive(archive_url: str) -> list[dict]:
+    return requests.get(archive_url, headers=USER_AGENT_HEADER).json().get("games", [])
 
+# reorder the game for costum format
+def formatGame(game: dict, name: str) -> str:
+    players = [game.get("white", {}), game.get("black", {})]
+    players = players if players[0].get("username", "").lower() == name.lower() else players[::-1]
 
-def get_games_from_archive(archive_url: str) -> list[dict]:
-    """Fetch all games from a single monthly archive URL."""
-    response = requests.get(archive_url, headers=USER_AGENT_HEADER)
-    response.raise_for_status()
-    return response.json().get("games", [])
+    result = players[0].get("result", "")
+    result = RESULT_DICT[result] if result in RESULT_DICT else 0
 
+    player = f"{players[0].get('username', '?')}, {players[0].get('rating', '?')}"
+    opp = f"{players[1].get('username', '?')}, {players[1].get('rating', '?')}"
 
-def format_game(game: dict, username: str) -> str:
-    white = game.get("white", {})
-    black = game.get("black", {})
+    return f"{player} VS {opp} | {result}"
 
-    is_white = white.get("username", "").lower() == username.lower()
-    player  = white if is_white else black
-    opponent = black if is_white else white
-
-    raw_result = player.get("result", "")
-    if raw_result == "win":
-        result = 1
-    elif raw_result in ("agreed", "repetition", "stalemate", "insufficient",
-                        "50move", "timevsinsufficient", "draws"):
-        result = 0.5
-    else:
-        result = 0  # loss, resigned, timeout, checkmated, abandoned, etc.
-
-    player_str   = f"{player.get('username', '?')}, {player.get('rating', '?')}"
-    opponent_str = f"{opponent.get('username', '?')}, {opponent.get('rating', '?')}"
-
-    return f"{player_str} VS {opponent_str} | {result}"
-
-
-def cache_matches(username: str, num: int):
-    """
-    Fetch the most recent `num` games for `username` and write them to a file.
-    Games are fetched newest-first (archives reversed), stopping at `num`.
-    """
-    archives = get_archives(username)
-    if not archives:
-        print(f"No archives found for '{username}'.")
-        return
-
+# save & cache
+def cacheMatches(name: str, num: int):
+    archives = getArchives(name)
     collected: list[str] = []
 
-    # Work backwards through archives (most recent first)
+    # loop recent -> old all archives
     for archive_url in reversed(archives):
-        if len(collected) >= num:
-            break
+        games = gamesFromArchive(archive_url)
 
-        print(f"Fetching {archive_url} ...")
-        games = get_games_from_archive(archive_url)
-
-        # Most recent games are at the end of each archive
+        # loop recent -> old all games from archive
         for game in reversed(games):
+            collected.append(formatGame(game, name))
+
             if len(collected) >= num:
                 break
-            collected.append(format_game(game, username))
 
+    # cache
     output = "\n".join(collected)
-    filename = rf"{username}-{num}_matches.txt"
+    filename = rf"{name}-{num}_matches.txt"
     with open(filename, "w+", encoding="UTF-8") as f:
         f.write(output)
 
-    print(f"Wrote {len(collected)} games to {filename}")
-
 if __name__ == "__main__":
-    cache_matches("hikaru", 50)
+    cacheMatches("hikaru", 50)

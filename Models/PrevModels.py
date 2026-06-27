@@ -4,8 +4,8 @@ from Utils.Constants import KAPPA, SCALAR
 from Utils.Player import Player, PlayerInitMode
 
 # Damping function
-def Damp(num: float, utility: int):
-    def sgn(x):
+def Damp(num: float, utility: int) -> float:
+    def sgn(x) -> int:
         return 2*x - 1
     return utility - sgn(utility) * (32/3) * pow(num, 3) + sgn(utility) * 16 * pow(num, 2) - sgn(utility) * (19/3) * num
 
