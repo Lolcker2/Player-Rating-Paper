@@ -8,11 +8,16 @@ USER_AGENT_HEADER = {'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
 def getMatch(root: tree._Element, index: int)-> list:
     # link = root[index].xpath(".//a[1]")[0]get("href")
-    _p1 = root[index].xpath(".//a[1]/div[1]")[0]
-    _p2 = root[index].xpath(".//a[1]/div[2]")[0]
+    _p1 = root[index].xpath("./td[1]/a[1]/div[1]")[0]
+    _p2 = root[index].xpath(".//td[1]/a[1]/div[2]")[0]
+
+    player_names = [_p1.xpath("./span")[0].text, _p2.xpath("./span")[0].text]
+    if "Guest 1" in player_names:
+        return ["",""]
+
     _r = root[index].xpath(".//td[2]/a")[0]
-    return [_p1.xpath("./*")[0].text + ", " + _p1.xpath("./*")[1].text[1:-1],
-            _p2.xpath("./*")[0].text + ", " + _p2.xpath("./*")[1].text[1:-1], _r.text.strip()]
+    return [player_names[0] + ", " + _p1.xpath("./span")[1].text[1:-1],
+            player_names[1] + ", " + _p2.xpath("./span")[1].text[1:-1], _r.text.strip()]
 
 def getPage(name: str, page:int=1)-> list:
     url = f"https://www.chess.com/games/search?p1={name.replace(' ', '%20')}&page={page}"
@@ -28,11 +33,14 @@ def cacheMatches(name: str, num: int):
     pages = math.ceil(num / 25)
     aggregate = ""
     for page in range(1, pages):
-        aggregate += "\n".join(f"{item[0]} VS {item[1]} | {item[2]}" for item in getPage(name, page))
+        gpage = getPage(name, page)
+        print(gpage)
+        aggregate += "\n".join(f"{item[0]} VS {item[1]} | {item[2]}" for item in gpage)
         aggregate += "\n"
     aggregate += "\n".join(f"{item[0]} VS {item[1]} | {item[2]}" for item in getPage(name, pages)[0:25 if num%25==0 else num%25])
 
-    # open(rf"Cache\{name}-{num}_matches.txt", "w", encoding='UTF-8').write(aggregate)
+    open(rf"..\Cache\{name}-{num}_matches.txt", "w+", encoding='UTF-8').write(aggregate)
 
 if __name__ == '__main__':
-    cacheMatches("Magnus Carlsen", 100)
+    cacheMatches("Magnus Carlsen", 1000)
+    # getPage("Magnus Carlsen", 8)
