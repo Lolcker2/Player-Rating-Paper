@@ -32,6 +32,7 @@ def BracketMatchmaking(_N: int, matches: int, bracketSize: int, snapshot:int = 1
     for i in range(0, _N, bracketSize):
         bracket = population[i: i + bracketSize]
         results = Results(bracket, matches)
+        # im getting 20+ brackets when expecting 10
         saveSnapshots(parseResults(bracket, results, snapshot, PlayerInitMode.SIGMA), suffix=f"[{(i+bracketSize) // bracketSize}]")
         finalPopulation.extend(bracket) # add bracket to the aggragate
 
@@ -58,6 +59,7 @@ def parseResults(population: list, results: list, snapshot:int = 1000, model:Pla
         else: # using cv
             population[result[0]], population[result[1]] = cov.Update(population[result[0]], population[result[1]], result[2])
         
+                                    # change division to multiplication if using cv
         # snapshot handling
         if i % snapshot == 0:
             snapshot_num += 1
@@ -77,8 +79,8 @@ def saveSnapshots(snap_list: list[str], suffix:str=""):
 
 if __name__ == '__main__':
     # snapshot_num = 0
-    # NaiveMatchmaking(10, 10, snapshot=10)
-    BracketMatchmaking(10, 10, 5, snapshot=10)
+    # NaiveMatchmaking(1000, 1000, snapshot=1_000_000)
+    BracketMatchmaking(1000, 1000, 5, snapshot=1_000_000)
 
 
 """

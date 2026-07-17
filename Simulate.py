@@ -16,6 +16,8 @@ def reOrient(_match: list[str], _name: str):
         return [_match[1], _match[0], -1 * _match[2] + 1] 
     return  _match
 
+
+# whole format change!
 def getMatch(_data: list, _index: int, _match: list = False)->list:
     match, result = _match.split('|') if _match else _data[_index].split('|')
     p1, p2 = [i.split(',') for i in match.split("VS")]
