@@ -16,7 +16,7 @@ def NewPlayer(rating: float, hidden: float=0.0, sigma_cv: float = None, init_mod
 def Populate(_N: int, init_mode: PlayerInitMode = PlayerInitMode.NONE)->list[Player]:
     match init_mode:
         case PlayerInitMode.NONE:
-            return [NewPlayer(START_RATING, int(1300 + 200*RNG.random())) for _ in range(_N)]
+            return [NewPlayer(START_RATING, int(1300 + 400*RNG.random())) for _ in range(_N)]
         case PlayerInitMode.SIGMA:
             return [NewPlayer(START_RATING, int(1300 + 400*RNG.random()), START_SIGMA, PlayerInitMode.SIGMA) for _ in range(_N)]
         case PlayerInitMode.CV:

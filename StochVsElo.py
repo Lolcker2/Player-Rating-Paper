@@ -11,21 +11,21 @@ import Models.SigmaModel as smodel
 
 # Simulates the population of players, takes snapshots regularly.
 def NaiveMatchmaking(_N: int, matches: int, snapshot:int = 1000):
-    population = Populate(_N, PlayerInitMode.SIGMA)
+    population = Populate(_N, PlayerInitMode.CV)
     results = Results(population, matches)
-    saveSnapshots(parseResults(population, results, snapshot, PlayerInitMode.SIGMA))
-
+    saveSnapshots(parseResults(population, results, snapshot, PlayerInitMode.CV), "naive-cv")
 
     # final rating snapshot
     finalsnapshot = ""
     for player in sorted(population, key=lambda obj: obj.hidden):
         finalsnapshot += f"{player.hidden},{int(player.rating)}\n"
-    with open("log", "w") as f:
+    with open("log-cv", "w") as f:
         f.write(finalsnapshot)
+
 
 # Simulates the population of players all divided into brackets, takes snapshots regularly.
 def BracketMatchmaking(_N: int, matches: int, bracketSize: int, snapshot:int = 1000):
-    population = sorted(Populate(_N, PlayerInitMode.SIGMA), key=lambda obj: obj.hidden)
+    population = sorted(Populate(_N, PlayerInitMode.CV), key=lambda obj: obj.hidden)
     finalPopulation = [] # an aggragate of all brackets
 
     # dividing the populations to brackets
@@ -33,14 +33,14 @@ def BracketMatchmaking(_N: int, matches: int, bracketSize: int, snapshot:int = 1
         bracket = population[i: i + bracketSize]
         results = Results(bracket, matches)
         # im getting 20+ brackets when expecting 10
-        saveSnapshots(parseResults(bracket, results, snapshot, PlayerInitMode.SIGMA), suffix=f"[{(i+bracketSize) // bracketSize}]")
+        saveSnapshots(parseResults(bracket, results, snapshot, PlayerInitMode.CV), suffix=f"[{(i+bracketSize) // bracketSize}]")
         finalPopulation.extend(bracket) # add bracket to the aggragate
 
     # final rating snapshot
     finalsnapshot = ""
     for player in sorted(finalPopulation, key=lambda obj: obj.hidden):
         finalsnapshot += f"{player.hidden},{int(player.rating)}\n"
-    with open("log", "w") as f:
+    with open("log[Bracket]", "w") as f:
         f.write(finalsnapshot)
 
 # add a snapshot style macro
@@ -79,28 +79,6 @@ def saveSnapshots(snap_list: list[str], suffix:str=""):
 
 if __name__ == '__main__':
     # snapshot_num = 0
-    # NaiveMatchmaking(1000, 1000, snapshot=1_000_000)
-    BracketMatchmaking(1000, 1000, 5, snapshot=1_000_000)
-
-
-"""
-write a macro for styling / deciding what goes into the snapshots
-
-    def macro_print(func):
-        def wrapper(*args, **kwargs):
-            # Executes your function
-            result = func(*args, **kwargs)
-            # Accesses the variable from the function's local scope
-            print(f"Variable 'num' is: {result}")
-            return result
-        return wrapper
-
-    @macro_print
-    def get_num():
-        num = 100
-        return num
-
-    get_num()
-
-
-"""
+    #NaiveMatchmaking(1000, 1000, snapshot=1_000_000)
+    BracketMatchmaking(1000, 1000, 200, snapshot=1_000_000) # 5
+    #BracketMatchmaking(1000, 1000, 50, snapshot=1_000_000) # 20

@@ -8,5 +8,6 @@ hetro.txt
 
 # Cache
 Cache/
+TempCache/
 Snapshots/
 */__pycache__/
