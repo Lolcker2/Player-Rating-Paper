@@ -1,5 +1,6 @@
 import Models.CoVModel as cov
 import Models.SigmaModel as smodel
+from itertools import combinations
 from Models.PrevModels import EstProb, EloProb, Update as EloUpdate
 from Utils.Player import Player, PlayerInitMode
 
@@ -10,7 +11,6 @@ ResultWeights = {"1-0": 1, "0-1": 0, "½-½": 0.5, "Â½-Â½": 0.5}
 def ff(f):
     return f"{f:.2f}"
 
-# whole format change!
 def getMatch(_data: list, _index: int, _match: list = False)->list:
     match, result = _match.split('|') if _match else _data[_index].split('|')
     p1, p2 = match.split("VS")
@@ -56,20 +56,43 @@ def predictiveTest(data: list):
     data = [getMatch([], 0, match) for match in data] # getting all the matches
 
     players = [Player(1, 1), Player(1, 1)]
-    sigma_cv = 0.06 # ----
+    sigma_cv = 0.2 # ----
     aggragate = "" # aggragate of the results
 
     for match in data:
         [players[i].rePurpose(match[i], 1, sigma_cv) for i in range(len(players))]
         elo = EloProb(*players)
-        stoch = EstProb(*players, PlayerInitMode.CV)
+        stoch = EstProb(*players, PlayerInitMode.CV) # -----
         aggragate += f"E({elo}) vs S({(ff(stoch))}): ~{match[2]}~\n"
     
     with open(f"Snapshots/PredictiveTest", "w") as f:
         f.write(aggragate)
 
+
+#-----------------------------------------------------
+
+def CardinalityTest(data: list):
+    
+    data = [entry.split(",") for entry in data]
+    population = [Player(int(entry[1]), int(entry[0]), float(entry[2])) for entry in data]
+
+    # get all pairs of players
+    pairs = list(combinations(set(population), 2))
+
+    aggragate = "" # aggragate of the results
+
+    for players in pairs:
+        elo = EloProb(*players)
+        stoch = EstProb(*players, PlayerInitMode.CV) # -----
+        aggragate += f"E({elo}) vs S({(ff(stoch))}): ~{match[2]}~\n"
+
+    with open(f"Snapshots/CardTest", "w") as f:
+        f.write(aggragate)
+
+
 if __name__ == '__main__':
     filename = 'carlsen magnus-unified_matches'
-    data = open(r'Cache/' + filename + '.txt', "r").read().split('\n')
-
-    historicalConvergence(data, True) # work on the function
+    # data = open(r'Cache/' + filename + '.txt', "r").read().split('\n')
+    data = open(r"./log", "r").read().split('\n')
+    # print(data)
+    CardinalityTest(data)

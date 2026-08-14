@@ -11,15 +11,16 @@ import Models.SigmaModel as smodel
 
 # Simulates the population of players, takes snapshots regularly.
 def NaiveMatchmaking(_N: int, matches: int, snapshot:int = 1000):
-    population = Populate(_N, PlayerInitMode.CV)
+    population = Populate(_N, PlayerInitMode.SIGMA)
     results = Results(population, matches)
-    saveSnapshots(parseResults(population, results, snapshot, PlayerInitMode.CV), "naive-cv")
+    saveSnapshots(parseResults(population, results, snapshot, PlayerInitMode.SIGMA), "naive")
 
     # final rating snapshot
     finalsnapshot = ""
     for player in sorted(population, key=lambda obj: obj.hidden):
-        finalsnapshot += f"{player.hidden},{int(player.rating)}\n"
-    with open("log-cv", "w") as f:
+        # finalsnapshot += f"{player.hidden},{int(player.rating)}\n"
+        finalsnapshot += f"{player.hidden},{int(player.rating)},{player.std_cv}\n"
+    with open("log", "w") as f:
         f.write(finalsnapshot)
 
 
@@ -79,6 +80,6 @@ def saveSnapshots(snap_list: list[str], suffix:str=""):
 
 if __name__ == '__main__':
     # snapshot_num = 0
-    #NaiveMatchmaking(1000, 1000, snapshot=1_000_000)
-    BracketMatchmaking(1000, 1000, 200, snapshot=1_000_000) # 5
+    NaiveMatchmaking(10, 1000, snapshot=1_0000000)
+    # BracketMatchmaking(1000, 1000, 200, snapshot=1_000_000) # 5
     #BracketMatchmaking(1000, 1000, 50, snapshot=1_000_000) # 20
